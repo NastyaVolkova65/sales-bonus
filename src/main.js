@@ -5,6 +5,9 @@
  * @returns {number}
  */
 function calculateSimpleRevenue(purchase, _product) {
+    if (!purchase || !purchase.items || !Array.isArray(purchase.items)) {
+        return 0;
+    }
    // @TODO: Расчет выручки от операции
    let revenue = 0;
 
@@ -28,19 +31,24 @@ function calculateSimpleRevenue(purchase, _product) {
  */
 function calculateBonusByProfit(index, total, seller) {
     // @TODO: Расчет бонуса от позиции в рейтинге
+    let bonusPercent;
       if (index === total - 1) {
-        return 0; // 0% бонус
+        bonusPercent = 0; // 0% бонус
     }
 
     if (index === 0) {
-        return 15; // 15% бонус
+        bonusPercent = 15; // 15% бонус
     }
 
-    if (index === 1 || index === 2) {
-        return 10; // 10% бонус
+    else if (index === 1 || index === 2) {
+        bonusPercent = 10; // 10% бонус
     }
 
-    return 5; // 5% бонус
+    else {
+    bonusPercent = 5; // 5% бонус
+    }
+
+    return (seller.profit || 0) * (bonusPercent / 100);
 }
 
 /**
