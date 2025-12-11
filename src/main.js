@@ -5,17 +5,16 @@
  * @returns {number}
  */
 function calculateSimpleRevenue(purchase, _product) {
-    if (!purchase || !purchase.items || !Array.isArray(purchase.items)) {
-        return 0;
+    if (purchase && purchase.sale_price !== undefined) {
+        return purchase.sale_price * purchase.quantity * (1 - (purchase.discount || 0) / 100);
     }
+
+    if (!purchase || !purchase.items) return 0;
    // @TODO: Расчет выручки от операции
    let revenue = 0;
 
      for (const item of purchase.items) {
-        const fullPrice = item.sale_price * item.quantity;
-        const discountDecimal = item.discount / 100;
-        const discountedPrice = fullPrice * (1 - discountDecimal);
-        revenue += discountedPrice;
+        revenue += item.sale_price * item.quantity * (1 - (item.discount || 0) / 100);
     }
 
     return revenue;
@@ -36,7 +35,7 @@ function calculateBonusByProfit(index, total, seller) {
         bonusPercent = 0; // 0% бонус
     }
 
-    if (index === 0) {
+    else if (index === 0) {
         bonusPercent = 15; // 15% бонус
     }
 
@@ -48,7 +47,8 @@ function calculateBonusByProfit(index, total, seller) {
     bonusPercent = 5; // 5% бонус
     }
 
-    return (seller.profit || 0) * (bonusPercent / 100);
+    const profit = seller.profit || 0;
+    return profit * (bonusPercent / 100);
 }
 
 /**
@@ -78,6 +78,18 @@ function analyzeSalesData(data, options) {
 
     if (!options || typeof options !== 'object') {
         throw new Error('Options должны быть объектом');
+    }
+
+    if (!Array.isArray(data.sellers) || data.sellers.length === 0) {
+        throw new Error('Отсутствует массив продавцов');
+    }
+
+    if (!Array.isArray(data.products) || data.products.length === 0) {
+        throw new Error('Отсутствует массив товаров');
+    }
+
+    if (!Array.isArray(data.purchase_records) || data.purchase_records.length === 0) {
+        throw new Error('Отсутствует массив покупок');
     }
 
     const { calculateRevenue, calculateBonus } = options;
